@@ -136,3 +136,13 @@ crashlytics-build.properties
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# macOS
+.DS_Store
+.DS_Store.meta
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db.meta
+desktop.ini
