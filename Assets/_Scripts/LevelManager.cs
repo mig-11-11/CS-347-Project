@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
     [Header("Level Settings")]
-    [SerializeField] private int currentLevel = 1;
     [Tooltip("Maximum fireballs the mage can cast in this level")]
     [SerializeField] private int maxShotsForLevel = 5;
 
@@ -22,7 +22,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int shotPenaltyPoints = 50;
 
     // Events for UI or audio listeners
-    public event Action<int> OnLevelChanged;
     public event Action<int> OnScoreChanged;
     public event Action<float> OnTimeChanged;
     public event Action<int, int> OnShotsChanged; // (shotsRemaining, maxShots)
@@ -39,7 +38,6 @@ public class LevelManager : MonoBehaviour
     // private int comboCount = 0;
     private float lastKillTime = -10f;
 
-    public int CurrentLevel => currentLevel;
     public int CurrentScore => currentScore;
     public float ElapsedTime => elapsedTime;
     public int MaxShots => maxShotsForLevel;
@@ -50,7 +48,8 @@ public class LevelManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        // The outgoing level is deactivated before its deferred destruction.
+        if (Instance != null && Instance != this && Instance.gameObject.activeInHierarchy)
         {
             Destroy(gameObject);
             return;
@@ -58,23 +57,27 @@ public class LevelManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        SkeletonEnemy[] enemies = FindObjectsOfType<SkeletonEnemy>();
-        remainingSkeletons = 0;
-        foreach (SkeletonEnemy enemy in enemies)
+        if (Instance == this)
         {
-            if (enemy != null && !enemy.IsDead)
-            {
-                remainingSkeletons++;
-            }
+            Instance = null;
         }
+    }
 
-        // Push initial state to any subscribed UI
-        OnLevelChanged?.Invoke(currentLevel);
-        OnShotsChanged?.Invoke(ShotsRemaining, maxShotsForLevel);
+    public void InitializeLevelState(int enemyCount)
+    {
+        remainingSkeletons = enemyCount;
+
+        currentScore = 0;
+        elapsedTime = 0f;
+        shotsTaken = 0;
+        isLevelComplete = false;
+        isLevelRunning = true;
+
         OnScoreChanged?.Invoke(currentScore);
         OnTimeChanged?.Invoke(elapsedTime);
+        OnShotsChanged?.Invoke(ShotsRemaining, maxShotsForLevel);
     }
 
     private void Update()
@@ -153,7 +156,6 @@ public class LevelManager : MonoBehaviour
 
         OnLevelCompleted?.Invoke(new LevelCompleteData
         {
-            Level = currentLevel,
             BaseScore = baseScore,
             TimeBonus = timeBonus,
             ShotsUsed = shotsTaken,
@@ -166,7 +168,6 @@ public class LevelManager : MonoBehaviour
 
 public struct LevelCompleteData
 {
-    public int Level;
     public int BaseScore;
     public int TimeBonus;
     public int ShotsUsed;

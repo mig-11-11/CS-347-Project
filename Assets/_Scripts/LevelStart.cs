@@ -11,9 +11,12 @@ public class LevelStart : MonoBehaviour
     [SerializeField] private GameObject magePrefab;
     [SerializeField] private GameObject skeletonEnemyPrefab;
 
-    private int currentLevelIndex = 0;
+    public int CurrentLevelIndex { get; private set; } = 0;
     private GameObject activeLevelInstance;
     private readonly List<SkeletonEnemy> activeEnemies = new List<SkeletonEnemy>();
+    public bool HasNextLevel =>
+        CurrentLevelIndex < levelPrefabs.Count - 1;
+
 
     private void Start()
     {
@@ -33,11 +36,12 @@ public class LevelStart : MonoBehaviour
             levelIndex = 0;
         }
 
-        currentLevelIndex = levelIndex;
+        CurrentLevelIndex = levelIndex;
         ClearCurrentLevel();
 
-        activeLevelInstance = Instantiate(levelPrefabs[currentLevelIndex], Vector3.zero, Quaternion.identity);
+        activeLevelInstance = Instantiate(levelPrefabs[CurrentLevelIndex], Vector3.zero, Quaternion.identity);
         SpawnCharactersFromMarkers(activeLevelInstance.transform);
+        LevelManager.Instance.InitializeLevelState(GetRemainingEnemyCount());
     }
 
     private void SpawnCharactersFromMarkers(Transform levelRoot)
@@ -85,6 +89,7 @@ public class LevelStart : MonoBehaviour
 
         if (activeLevelInstance != null)
         {
+            activeLevelInstance.SetActive(false);
             Destroy(activeLevelInstance);
             activeLevelInstance = null;
         }
@@ -98,12 +103,14 @@ public class LevelStart : MonoBehaviour
 
     public void RestartLevel()
     {
-        LoadLevel(currentLevelIndex);
+        LoadLevel(CurrentLevelIndex);
     }
 
     public void LoadNextLevel()
     {
-        LoadLevel(currentLevelIndex + 1);
+        if (!HasNextLevel) return;
+
+        LoadLevel(CurrentLevelIndex + 1);
     }
 
     public int GetRemainingEnemyCount()

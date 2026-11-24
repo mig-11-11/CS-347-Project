@@ -5,6 +5,8 @@ using TMPro;
 
 public class LevelHUDManager : MonoBehaviour
 {
+    [SerializeField] private LevelStart levelStart;
+
     [Header("Top-Left UI")]
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text shotsText;
@@ -16,6 +18,7 @@ public class LevelHUDManager : MonoBehaviour
     [Header("Level Complete UI")]
     [SerializeField] private GameObject levelCompletePanel;
     [SerializeField] private TMP_Text finalScoreSummaryText;
+    [SerializeField] private GameObject nextLevelButton;
 
     private LevelManager boundManager;
 
@@ -33,15 +36,24 @@ public class LevelHUDManager : MonoBehaviour
             return;
         }
 
+        // The HUD is in the level prefab, while the loader lives in the scene
+        if (levelStart == null)
+        {
+            levelStart = FindObjectOfType<LevelStart>();
+        }
+
+        if (levelStart != null)
+        {
+            HandleLevelChanged(levelStart.CurrentLevelIndex + 1);
+        }
+
         // Subscribe to future updates
-        boundManager.OnLevelChanged += HandleLevelChanged;
         boundManager.OnShotsChanged += HandleShotsChanged;
         boundManager.OnScoreChanged += HandleScoreChanged;
         boundManager.OnTimeChanged += HandleTimeChanged;
         boundManager.OnLevelCompleted += HandleLevelCompleted;
 
-        // Sync initial values in case LevelManager.Start() ran first
-        HandleLevelChanged(boundManager.CurrentLevel);
+        // The level may have initialized before the HUD subscribed.
         HandleShotsChanged(boundManager.ShotsRemaining, boundManager.MaxShots);
         HandleScoreChanged(boundManager.CurrentScore);
         HandleTimeChanged(boundManager.ElapsedTime);
@@ -51,7 +63,6 @@ public class LevelHUDManager : MonoBehaviour
     {
         if (boundManager == null) return;
 
-        boundManager.OnLevelChanged -= HandleLevelChanged;
         boundManager.OnShotsChanged -= HandleShotsChanged;
         boundManager.OnScoreChanged -= HandleScoreChanged;
         boundManager.OnTimeChanged -= HandleTimeChanged;
@@ -92,17 +103,31 @@ public class LevelHUDManager : MonoBehaviour
         }
     }
 
+    public void HandleRetryClicked()
+    {
+        if (levelStart != null) levelStart.RestartLevel();
+    }
+
+    public void HandleNextLevelClicked()
+    {
+        if (levelStart != null) levelStart.LoadNextLevel();
+    }
+
     private void HandleLevelCompleted(LevelCompleteData data)
     {
+        if (nextLevelButton != null)
+            nextLevelButton.SetActive(levelStart != null && levelStart.HasNextLevel);
+
         if (levelCompletePanel != null)
-        {
             levelCompletePanel.SetActive(true);
-        }
 
         if (finalScoreSummaryText != null)
         {
+            string heading = levelStart != null
+                ? $"Level {levelStart.CurrentLevelIndex + 1} Complete!"
+                : "Level Complete!";
             finalScoreSummaryText.text =
-                $"Level {data.Level} Complete!\n" +
+                $"{heading}\n" +
                 $"Base Score: {data.BaseScore:N0}\n" +
                 $"Time Bonus: +{data.TimeBonus:N0}\n" +
                 $"Shots Used ({data.ShotsUsed}): -{data.ShotPenalty:N0}\n" +
