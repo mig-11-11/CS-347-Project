@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -27,6 +24,11 @@ public class LevelManager : MonoBehaviour
     public event Action<int, int> OnShotsChanged; // (shotsRemaining, maxShots)
     public event Action<LevelCompleteData> OnLevelCompleted;
 
+    private LevelStart levelStart;
+    public void LoadNextLevel() => levelStart.LoadNextLevel();
+    public void RestartLevel() => levelStart.RestartLevel();
+    public void GoToTitle() => levelStart.GoToTitle();
+
     private int currentScore = 0;
     private float elapsedTime = 0f;
     private int shotsTaken = 0;
@@ -38,6 +40,8 @@ public class LevelManager : MonoBehaviour
     // private int comboCount = 0;
     private float lastKillTime = -10f;
 
+    public int CurrentLevelIndex => levelStart.CurrentLevelIndex;
+    public bool HasNextLevel => levelStart.HasNextLevel;
     public int CurrentScore => currentScore;
     public float ElapsedTime => elapsedTime;
     public int MaxShots => maxShotsForLevel;
@@ -65,8 +69,10 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void InitializeLevelState(int enemyCount)
+    public void InitializeLevelState(LevelStart levelStart, int enemyCount)
     {
+        // The loader supplies itself before the level HUD starts
+        this.levelStart = levelStart;
         remainingSkeletons = enemyCount;
 
         currentScore = 0;

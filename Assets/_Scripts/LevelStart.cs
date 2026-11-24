@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelStart : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class LevelStart : MonoBehaviour
 
         activeLevelInstance = Instantiate(levelPrefabs[CurrentLevelIndex], Vector3.zero, Quaternion.identity);
         SpawnCharactersFromMarkers(activeLevelInstance.transform);
-        LevelManager.Instance.InitializeLevelState(GetRemainingEnemyCount());
+        LevelManager.Instance.InitializeLevelState(this, GetRemainingEnemyCount());
     }
 
     private void SpawnCharactersFromMarkers(Transform levelRoot)
@@ -109,8 +110,12 @@ public class LevelStart : MonoBehaviour
     public void LoadNextLevel()
     {
         if (!HasNextLevel) return;
-
         LoadLevel(CurrentLevelIndex + 1);
+    }
+
+    public void GoToTitle()
+    {
+        SceneManager.LoadScene("TitleScreen");
     }
 
     public int GetRemainingEnemyCount()
