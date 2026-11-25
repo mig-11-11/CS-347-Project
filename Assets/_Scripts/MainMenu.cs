@@ -17,4 +17,14 @@ public class MainMenu : MonoBehaviour
         Debug.Log("I QUIT I SWEAR");
         Application.Quit();
     }
+
+    public void Options()
+    {
+        SceneManager.LoadScene("Options");
+    }
+
+    public void CloseOptions()
+    {
+        SceneManager.LoadScene("TitleScreen");
+    }
 }
