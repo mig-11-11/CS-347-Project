@@ -23,6 +23,7 @@ public class LevelManager : MonoBehaviour
     public event Action<float> OnTimeChanged;
     public event Action<int, int> OnShotsChanged; // (shotsRemaining, maxShots)
     public event Action<LevelCompleteData> OnLevelCompleted;
+    public event Action OnLevelFailed;
 
     private LevelStart levelStart;
     public void LoadNextLevel() => levelStart.LoadNextLevel();
@@ -36,6 +37,7 @@ public class LevelManager : MonoBehaviour
 
     private bool isLevelRunning = true;
     private bool isLevelComplete = false;
+    private bool isLevelFailed = false;
 
     // private int comboCount = 0;
     private float lastKillTime = -10f;
@@ -79,6 +81,7 @@ public class LevelManager : MonoBehaviour
         elapsedTime = 0f;
         shotsTaken = 0;
         isLevelComplete = false;
+        isLevelFailed = false;
         isLevelRunning = true;
 
         OnScoreChanged?.Invoke(currentScore);
@@ -92,6 +95,21 @@ public class LevelManager : MonoBehaviour
 
         elapsedTime += Time.deltaTime;
         OnTimeChanged?.Invoke(elapsedTime);
+
+        if (HasPlayerFailed())
+        {
+            LevelFailed();
+        }
+    }
+
+    public void LevelFailed() //Setter for when update runs and checks the failed state
+    {
+        if (isLevelComplete || isLevelFailed) return;
+
+        isLevelFailed = true;
+        isLevelRunning = false;
+
+        OnLevelFailed?.Invoke();
     }
 
     /// <summary>
@@ -107,12 +125,25 @@ public class LevelManager : MonoBehaviour
         return true;
     }
 
+    public bool HasPlayerFailed()
+    {
+        if (ShotsRemaining == 0 && remainingSkeletons > 0) //Probably a better way to do this but it's all I can think off at the moment
+        {
+            if (FindFirstObjectByType<BouncySpell>() == null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Call when a skeleton dies. Awards combo-scaled points and ends the level when none remain.
     /// </summary>
     public void RegisterSkeletonKill()
     {
-        if (isLevelComplete) return;
+        if (isLevelComplete || isLevelFailed) return;
 
         /*if (Time.time - lastKillTime <= comboWindow)
         {
@@ -145,7 +176,7 @@ public class LevelManager : MonoBehaviour
 
     public void CompleteLevel()
     {
-        if (isLevelComplete) return;
+        if (isLevelComplete || isLevelFailed) return;
 
         isLevelComplete = true;
         isLevelRunning = false;
