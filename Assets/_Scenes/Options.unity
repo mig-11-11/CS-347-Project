@@ -1109,7 +1109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -582, y: 222}
+  m_AnchoredPosition: {x: -517, y: 222}
   m_SizeDelta: {x: -41.313, y: -39.456}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1017122629
@@ -1262,6 +1262,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a9f3d46438acac4cb1a448a7b0c2446, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  masterVolumeSlider: {fileID: 1316787375}
+  musicVolumeSlider: {fileID: 1380104414}
+  sfxVolumeSlider: {fileID: 1002252500}
 --- !u!1 &1030561281
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,6 +1671,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a9f3d46438acac4cb1a448a7b0c2446, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  masterVolumeSlider: {fileID: 0}
+  musicVolumeSlider: {fileID: 0}
+  sfxVolumeSlider: {fileID: 0}
 --- !u!1 &1371010318
 GameObject:
   m_ObjectHideFlags: 0

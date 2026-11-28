@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
@@ -45,6 +46,17 @@ public class MainMenu : MonoBehaviour
     public void SetVolumeSFX(float v)
     {
         PlayerPrefs.SetFloat("SFXVolume", v);
+    }
+
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+
+    void Start()
+    {
+        masterVolumeSlider.value = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        sfxVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
     }
 
 }
